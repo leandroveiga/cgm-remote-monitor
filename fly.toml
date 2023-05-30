@@ -41,6 +41,8 @@ CUSTOM_TITLE="Nightscout"
 # Default setting for whether or not these plugins are checked (active) by default not merely enabled. Include plugins here as in the ENABLE line; space-separated and lower-case.
 SHOW_PLUGINS="careportal dbsize openaps cob iob basal"
 
+LANGUAGE="br"
+
 # simple' and/or 'predict'. Simple alarms trigger when BG crosses the various thresholds set below. Predict alarms use a formula that forecasts where the BG is going based on its trend. You will *not* get warnings when crossing the BG thresholds set below when using the predict type.
 ALARM_TYPES="simple"
 
