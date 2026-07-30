@@ -1,7 +1,7 @@
 {
     "interactionModel": {
         "languageModel": {
-            "invocationName": "night scout",
+            "invocationName": "nightscout",
             "intents": [
                 {
                     "name": "NSStatus",
@@ -38,7 +38,7 @@
                         },
                         {
                             "name": "pwd",
-                            "type": "AMAZON.US_FIRST_NAME"
+                            "type": "AMAZON.FirstName"
                         }
                     ],
                     "samples": [
@@ -289,7 +289,7 @@
                         },
                         {
                             "name": "pwd",
-                            "type": "AMAZON.US_FIRST_NAME",
+                            "type": "AMAZON.FirstName",
                             "confirmationRequired": false,
                             "elicitationRequired": false,
                             "prompts": {}
