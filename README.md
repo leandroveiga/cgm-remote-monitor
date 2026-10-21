@@ -105,6 +105,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
         - [`xdripjs` (xDrip-js)](#xdripjs-xdrip-js)
         - [`alexa` (Amazon Alexa)](#alexa-amazon-alexa)
         - [`googlehome` (Google Home/DialogFLow)](#googlehome-google-homedialogflow) [broken]
+        - [`mcp` (Model Context Protocol server)](#mcp-model-context-protocol-server)
         - [`speech` (Speech)](#speech-speech)
         - [`cors` (CORS)](#cors-cors)
       - [Extended Settings](#extended-settings)
@@ -692,6 +693,12 @@ For remote overrides, the following extended settings must be configured:
   Integration with Google Home (via DialogFlow), [detailed setup instructions](docs/plugins/googlehome-plugin.md)
 
   Unfortunately this integration broke when [Google discontinued conversational actions](https://developers.google.com/assistant/ca-sunset). We'll keep this here for reference, in case it can be revived at some point in the future.
+
+##### `mcp` (Model Context Protocol server)
+  Exposes a read-only [Model Context Protocol](https://modelcontextprotocol.io) server at `/api/v1/mcp`, using the Streamable HTTP transport, so MCP-compatible clients (e.g. AI assistants) can query current glucose, glucose history, IOB/COB, treatments, device status, and profile data.
+  * Requests are authorized using the same permission checks as the regular API (`api:*:read`), so a valid token/API secret with read access is required.
+  * Available tools: `get_current_glucose`, `get_glucose_history`, `get_iob_cob`, `get_treatments`, `get_device_status`, `get_profile`.
+  * This is a read-only, Phase 1 implementation; see [docs/proposals/alexa-plus-mcp-feasibility-analysis.md](docs/proposals/alexa-plus-mcp-feasibility-analysis.md) for the full design and future phases (write tools, Alexa+-specific adaptation).
 
 ##### `speech` (Speech)
   Speech synthesis plugin. When enabled, speaks out the blood glucose values, IOB and alarms. Note you have to set the LANGUAGE setting on the server to get all translated alarms.
