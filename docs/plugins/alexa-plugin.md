@@ -106,6 +106,23 @@ See [Interacting with Virtual Assistants](interacting-with-virtual-assistants.md
 
 If your device is [registered](https://developer.amazon.com/docs/devconsole/test-your-skill.html#h2_register) with your developer account, you should be able to use your skill right away. Try it by asking Alexa one of the above questions using your device.
 
+## Recording insulin and carbs by voice (optional, pt-br template)
+
+The `RecordInsulin` and `RecordCarbs` intents (for example "Registre 2 unidades de insulina") create treatments (`Correction Bolus` / `Carb Correction`, `enteredBy: Alexa`). They are **disabled by default** and only record data in Nightscout; they do not deliver insulin.
+
+Safeguards, all enforced by the server:
+
+- `ALEXA_RECORD_ENABLED=true` must be set (extended setting of the `alexa` plugin).
+- The skill endpoint token must have the `api:treatments:create` permission (a dedicated subject/role, not the read-only one).
+- The Alexa dialog must return `confirmationStatus: CONFIRMED` (the pt-br template asks "Confirma o registro de ...?").
+- Value limits: `ALEXA_MAX_INSULIN` (default 10 units) and `ALEXA_MAX_CARBS` (default 150 g).
+- `ALEXA_SKILL_ID` (optional, recommended): only requests with this skill ID are accepted for recording.
+- Requests older than 150 seconds or with a repeated request ID are refused.
+
+Alexa request signature verification is not implemented by the plugin.
+
+Responses use the server language (`LANGUAGE` setting, e.g. `br` for Portuguese - Brazil).
+
 ## Updating your skill with new features
 
 As more work is done on Nightscout, new ways to interact with Nighscout via Alexa may be made available. To be able to use these new features, you first will need to [update your Nightscout site](https://github.com/nightscout/cgm-remote-monitor#updating-my-version), and then you can follow the steps below to update your Alexa skill.

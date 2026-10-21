@@ -1,7 +1,7 @@
 {
     "interactionModel": {
         "languageModel": {
-            "invocationName": "nightscout",
+            "invocationName": "night scout",
             "intents": [
                 {
                     "name": "NSStatus",
@@ -42,23 +42,63 @@
                         }
                     ],
                     "samples": [
+                        "como está a {metric} do {pwd}",
+                        "como está o {metric} do {pwd}",
+                        "qual é a {metric} do {pwd}",
+                        "qual é o {metric} do {pwd}",
+                        "quanto tem de {metric} o {pwd}",
+                        "quanto tem de {metric} do {pwd}",
+                        "quanto tem de {metric}",
                         "quanto {metric} resta a {pwd}",
-                        "o que é {metric}",
-                        "qual é a minha {metric}",
                         "quanto {metric} resta",
-                        "o que é {pwd} {metric}",
-                        "quanto {metric}",
-                        "como está {metric}",
-                        "como está minha {metric}",
-                        "como está {pwd} {metric}",
-                        "como está minha {metric}",
-                        "o que é {metric}",
-                        "quanto {metric} eu tenho",
                         "quanto {metric} {pwd} tem",
                         "quanto {metric} eu tenho",
+                        "quanto {metric}",
+                        "o que é {pwd} {metric}",
+                        "o que é {metric}",
                         "qual é a minha {metric}",
-                        "qual é a minha {metric}",
-                        "o que é {pwd} {metric}"
+                        "como está {pwd} {metric}",
+                        "como está {metric}",
+                        "como está minha {metric}"
+                    ]
+                },
+                {
+                    "name": "RecordInsulin",
+                    "slots": [
+                        {
+                            "name": "units",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{units} unidades",
+                                "{units}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "registre {units} unidades de insulina",
+                        "registrar {units} unidades de insulina",
+                        "anote {units} unidades de insulina",
+                        "registre {units} unidade de insulina",
+                        "registre insulina"
+                    ]
+                },
+                {
+                    "name": "RecordCarbs",
+                    "slots": [
+                        {
+                            "name": "grams",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "{grams} gramas",
+                                "{grams}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "registre {grams} gramas de carboidratos",
+                        "registrar {grams} gramas de carboidratos",
+                        "anote {grams} gramas de carboidratos",
+                        "registre carboidratos"
                     ]
                 },
                 {
@@ -129,7 +169,9 @@
                                 "value": "bg",
                                 "synonyms": [
                                     "número",
+                                    "glicemia",
                                     "glicose",
+                                    "nível de glicose",
                                     "açúcar no sangue",
                                     "glicose no sangue"
                                 ]
@@ -140,7 +182,8 @@
                                 "value": "iob",
                                 "synonyms": [
                                     "insulina que eu tenho",
-                                    "insulina ativa"
+                                    "insulina ativa",
+                                    "insulina a bordo"
                                 ]
                             }
                         },
@@ -160,7 +203,8 @@
                                 "synonyms": [
                                     "carboidratos",
                                     "carboidratos ativo",
-                                    "carboidratos",
+                                    "carboidratos ativos",
+                                    "carboidratos a bordo",
                                     "carboidratos que eu tenho"
                                 ]
                             }
@@ -295,11 +339,83 @@
                             "prompts": {}
                         }
                     ]
+                },
+                {
+                    "name": "RecordInsulin",
+                    "confirmationRequired": true,
+                    "prompts": {
+                        "confirmation": "Confirm.Intent.RecordInsulin"
+                    },
+                    "slots": [
+                        {
+                            "name": "units",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.RecordInsulin.units"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "RecordCarbs",
+                    "confirmationRequired": true,
+                    "prompts": {
+                        "confirmation": "Confirm.Intent.RecordCarbs"
+                    },
+                    "slots": [
+                        {
+                            "name": "grams",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.RecordCarbs.grams"
+                            }
+                        }
+                    ]
                 }
             ],
             "delegationStrategy": "ALWAYS"
         },
         "prompts": [
+            {
+                "id": "Confirm.Intent.RecordInsulin",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Confirma o registro de {units} unidades de insulina?"
+                    }
+                ]
+            },
+            {
+                "id": "Confirm.Intent.RecordCarbs",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Confirma o registro de {grams} gramas de carboidratos?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.RecordInsulin.units",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Quantas unidades de insulina?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.RecordCarbs.grams",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Quantos gramas de carboidratos?"
+                    }
+                ]
+            },
             {
                 "id": "Elicit.Slot.1421281086569.34001419564",
                 "variations": [

@@ -99,3 +99,170 @@ describe('Alexa REST api', function ( ) {
   });
 });
 
+describe('Alexa REST api - voice record intents', function ( ) {
+  this.timeout(10000);
+  const crypto = require('crypto');
+  const apiRoot = require('../lib/api/root');
+  const api = require('../lib/api/');
+  const secret = 'this is my long pass phrase';
+  const secretHash = crypto.createHash('sha1').update(secret).digest('hex');
+  let created = [];
+  const ptLanguage = require('../lib/language')(fs);
+  ptLanguage.set('br');
+  ptLanguage.loadLocalization(fs);
+  function intentBody (name, slotName, value, overrides) {
+    const body = {
+      session: { application: { applicationId: 'amzn1.ask.skill.test' } }
+      , request: {
+        type: 'IntentRequest'
+        , locale: 'pt-BR'
+        , requestId: 'amzn1.echo-api.request.' + Math.random()
+        , timestamp: new Date().toISOString()
+        , intent: {
+          name: name
+          , confirmationStatus: 'CONFIRMED'
+          , slots: {}
+        }
+      }
+    };
+    body.request.intent.slots[slotName] = { name: slotName, value: value };
+    Object.assign(body.request.intent, overrides && overrides.intent);
+    Object.assign(body.request, overrides && overrides.request);
+    return body;
+  }
+
+  before(function (done) {
+    delete process.env.API_SECRET;
+    process.env.API_SECRET = secret;
+    var env = require('../lib/server/env')( );
+    env.settings.enable = ['alexa'];
+    env.settings.authDefaultRoles = 'readable';
+    env.api_secret = secret;
+    env.extendedSettings.alexa = { recordEnabled: true, maxInsulin: 10, maxCarbs: 150, skillId: 'amzn1.ask.skill.test' };
+    this.env = env;
+    this.app = require('express')( );
+    this.app.enable('api');
+    var self = this;
+    require('../lib/server/bootevent')(env, ptLanguage).boot(function booted (ctx) {
+      const realCreate = ctx.treatments.create;
+      ctx.treatments.create = function (objs, fn) {
+        created = created.concat(objs);
+        realCreate.call(ctx.treatments, objs, fn);
+      };
+      self.ctx = ctx;
+      self.app.use('/api', bodyParser({ limit: 1048576 * 50 }), apiRoot(env, ctx));
+      self.app.use('/api/v1', bodyParser({ limit: 1048576 * 50 }), api(env, ctx));
+      done( );
+    });
+  });
+
+  beforeEach(function () { created = []; });
+
+  function post (app, body, withSecret) {
+    const r = request(app).post('/api/v1/alexa');
+    if (withSecret) { r.set('api-secret', secretHash); }
+    return r.send(body).expect(200);
+  }
+
+  it('records insulin when confirmed, authorized and within limits', function (done) {
+    post(this.app, intentBody('RecordInsulin', 'units', '2.5'), true).end(function (err, res) {
+      if (err) return done(err);
+      res.body.response.outputSpeech.text.should.equal('Registrei 2.5 unidades de insulina.');
+      created.length.should.equal(1);
+      created[0].insulin.should.equal(2.5);
+      created[0].enteredBy.should.equal('Alexa');
+      done( );
+    });
+  });
+
+  it('records carbs when confirmed, authorized and within limits', function (done) {
+    post(this.app, intentBody('RecordCarbs', 'grams', '30'), true).end(function (err, res) {
+      if (err) return done(err);
+      res.body.response.outputSpeech.text.should.equal('Registrei 30 gramas de carboidratos.');
+      created[0].carbs.should.equal(30);
+      done( );
+    });
+  });
+
+  it('refuses without create permission', function (done) {
+    post(this.app, intentBody('RecordInsulin', 'units', '2'), false).end(function (err, res) {
+      if (err) return done(err);
+      res.body.response.outputSpeech.text.should.containEql('n\u00e3o tem permiss\u00e3o');
+      created.length.should.equal(0);
+      done( );
+    });
+  });
+
+  it('refuses when not confirmed', function (done) {
+    const body = intentBody('RecordInsulin', 'units', '2', { intent: { confirmationStatus: 'NONE' } });
+    post(this.app, body, true).end(function (err, res) {
+      if (err) return done(err);
+      created.length.should.equal(0);
+      res.body.response.outputSpeech.text.should.containEql('recusado');
+      done( );
+    });
+  });
+
+  it('does not record when the user denies confirmation', function (done) {
+    const body = intentBody('RecordCarbs', 'grams', '20', { intent: { confirmationStatus: 'DENIED' } });
+    post(this.app, body, true).end(function (err, res) {
+      if (err) return done(err);
+      created.length.should.equal(0);
+      res.body.response.outputSpeech.text.should.equal('Ok, n\u00e3o registrei nada.');
+      done( );
+    });
+  });
+
+  it('refuses values above the limit', function (done) {
+    post(this.app, intentBody('RecordInsulin', 'units', '50'), true).end(function (err, res) {
+      if (err) return done(err);
+      created.length.should.equal(0);
+      res.body.response.outputSpeech.text.should.containEql('passa do limite');
+      done( );
+    });
+  });
+
+  it('refuses invalid values', function (done) {
+    post(this.app, intentBody('RecordCarbs', 'grams', '?'), true).end(function (err, res) {
+      if (err) return done(err);
+      created.length.should.equal(0);
+      res.body.response.outputSpeech.text.should.containEql('N\u00e3o entendi');
+      done( );
+    });
+  });
+
+  it('refuses a different skill id', function (done) {
+    const body = intentBody('RecordInsulin', 'units', '2');
+    body.session.application.applicationId = 'amzn1.ask.skill.other';
+    post(this.app, body, true).end(function (err, res) {
+      if (err) return done(err);
+      created.length.should.equal(0);
+      res.body.response.outputSpeech.text.should.containEql('recusado');
+      done( );
+    });
+  });
+
+  it('refuses stale timestamps', function (done) {
+    const body = intentBody('RecordInsulin', 'units', '2', { request: { timestamp: new Date(Date.now() - 600000).toISOString() } });
+    post(this.app, body, true).end(function (err) {
+      if (err) return done(err);
+      created.length.should.equal(0);
+      done( );
+    });
+  });
+
+  it('refuses a replayed request id', function (done) {
+    const self = this;
+    const body = intentBody('RecordCarbs', 'grams', '10');
+    post(self.app, body, true).end(function (err) {
+      if (err) return done(err);
+      post(self.app, body, true).end(function (err2, res) {
+        if (err2) return done(err2);
+        created.length.should.equal(1);
+        res.body.response.outputSpeech.text.should.containEql('recusado');
+        done( );
+      });
+    });
+  });
+});
+
