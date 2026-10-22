@@ -298,7 +298,7 @@ describe('Alexa REST api - third person (ALEXA_PATIENT_NAME)', function ( ) {
   }
 
   function statusBody () {
-    return { request: { type: 'IntentRequest', locale: 'pt-BR', requestId: 'amzn1.echo-api.request.' + Math.random(), timestamp: new Date().toISOString(), intent: { name: 'NSStatus' } } };
+    return { request: { type: 'IntentRequest', locale: 'pt-BR', requestId: 'amzn1.echo-api.request.' + Math.random(), timestamp: new Date().toISOString(), intent: { name: 'NSStatus', slots: { pwd: { name: 'pwd', value: 'Gabriel' } } } } };
   }
 
   function bootApp (extra, self, done) {
