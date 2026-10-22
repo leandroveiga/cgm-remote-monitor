@@ -121,6 +121,39 @@ describe('COB', function ( ) {
 
   });
 
+  describe('natural speech in pt-BR', function () {
+    const enTranslations = ctx.language.translations;
+
+    before(function () {
+      ctx.language.offerTranslations(require('../translations/pt_BR.json'));
+    });
+
+    after(function () {
+      ctx.language.offerTranslations(enTranslations);
+    });
+
+    function speak (cobValue, slots, expected) {
+      var sbx = { properties: { cob: { cob: cobValue } } };
+      var spoken;
+      cob.virtAsst.intentHandlers[0].intentHandler(function next (title, response) {
+        spoken = response;
+      }, slots, sbx);
+      spoken.should.equal(expected);
+    }
+
+    it('should say there are no active carbs', function () {
+      speak(0, [], 'No momento n\u00e3o h\u00e1 carboidratos ativos.');
+      speak(undefined, [], 'No momento n\u00e3o h\u00e1 carboidratos ativos.');
+      speak(0, { pwd: { value: 'Gabriel' } }, 'No momento Gabriel n\u00e3o tem carboidratos ativos.');
+    });
+
+    it('should name the unit and use the singular for 1 gram', function () {
+      speak(30, [], 'Voc\u00ea tem 30 gramas de carboidratos ativos');
+      speak(1, [], 'Voc\u00ea tem 1 grama de carboidratos ativos');
+      speak(12, { pwd: { value: 'Gabriel' } }, 'Gabriel tem 12 gramas de carboidratos ativos');
+    });
+  });
+
   describe('from devicestatus', function () {
     var time = Date.now();
     var treatments = [{

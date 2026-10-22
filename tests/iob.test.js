@@ -25,17 +25,60 @@ describe('IOB', function() {
 
     iob.virtAsst.intentHandlers[0].intentHandler(function next(title, response) {
       title.should.equal('Current IOB');
-      response.should.equal('You have 1.50 units of insulin on board');
+      response.should.equal('You have 1.5 units of insulin on board');
 
       iob.virtAsst.rollupHandlers[0].rollupHandler([], sbx, function callback (err, response) {
         should.not.exist(err);
-        response.results.should.equal('and you have 1.50 units of insulin on board.');
+        response.results.should.equal('and you have 1.5 units of insulin on board.');
         response.priority.should.equal(2);
         done();
       });
 
     }, [], sbx);
 
+  });
+
+  describe('natural speech in pt-BR', function () {
+    const enTranslations = ctx.language.translations;
+
+    before(function () {
+      ctx.language.offerTranslations(require('../translations/pt_BR.json'));
+    });
+
+    after(function () {
+      ctx.language.offerTranslations(enTranslations);
+    });
+
+    function speak (value, done, expectIntent, expectRollup) {
+      var sbx = { properties: { iob: { iob: value } } };
+      iob.virtAsst.intentHandlers[0].intentHandler(function next (title, response) {
+        response.should.equal(expectIntent);
+        iob.virtAsst.rollupHandlers[0].rollupHandler([], sbx, function callback (err, rollup) {
+          rollup.results.should.equal(expectRollup);
+          done();
+        });
+      }, [], sbx);
+    }
+
+    it('should say there is no active insulin', function (done) {
+      speak(0, done, 'No momento não há insulina ativa.', 'e não há insulina ativa.');
+    });
+
+    it('should say there is no active insulin when the value is unavailable', function (done) {
+      speak(undefined, done, 'No momento não há insulina ativa.', 'e não há insulina ativa.');
+    });
+
+    it('should drop the decimals of whole values', function (done) {
+      speak(3, done, 'Você tem 3 unidades de insulina ativa', 'e você tem 3 unidades de insulina ativa.');
+    });
+
+    it('should keep the decimals when present', function (done) {
+      speak(2.85, done, 'Você tem 2.85 unidades de insulina ativa', 'e você tem 2.85 unidades de insulina ativa.');
+    });
+
+    it('should use the singular for exactly 1 unit', function (done) {
+      speak(1, done, 'Você tem 1 unidade de insulina ativa', 'e você tem 1 unidade de insulina ativa.');
+    });
   });
 
   describe('from treatments', function ( ) {
