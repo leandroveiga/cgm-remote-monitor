@@ -1,7 +1,7 @@
 # API v1 Client Compatibility Specification
 
-**Document Version:** 1.0  
-**Last Updated:** January 2026  
+**Document Version:** 1.1  
+**Last Updated:** October 2026  
 **Status:** Draft  
 **Related Documents:** [Data Shape Requirements](./data-shape-requirements.md), [API Layer Audit](../audits/api-layer-audit.md)
 
@@ -280,6 +280,31 @@ socket.emit('dbAdd', {
 | Prediction data | Large `loop.predicted` arrays in devicestatus |
 | Enacted data | `loop.enacted` contains basal commands |
 
+### 4.4 AAPS NSClient v3 with a v1 uploader (xDrip+)
+
+**Origin:** technical analysis and production diagnosis (2026-10-22), AAPS 3.4.2.6 and Nightscout 15.0.8/15.0.9. **Author:** Mary (analyst), BIA Tech.
+
+| Aspect | Details |
+|--------|---------|
+| Scenario | xDrip+ uploads glucose through API v1 (`/api/v1/entries`); AAPS reads Nightscout through NSClient v3 |
+| Pre-15.0.9 behavior | v1 records had no `srvModified`, so they were absent from `/api/v3/<collection>/history` and AAPS received no new glucose |
+| 15.0.9 behavior | v1, WebSocket and in-process writes carry `srvModified`/`srvCreated` and appear in v3 history (upstream #8775). Records written before the upgrade stay invisible to v3 history |
+| Storage socket | `/storage` events (`create`/`update`/`delete`) are emitted only by API v3 writes, including in 15.0.9 (see [lib/api3/doc/socket.md](../../lib/api3/doc/socket.md)) |
+| AAPS with "Use WebSockets" on | After the initial load AAPS relies only on `/storage` events, so glucose written through v1 never arrives |
+| AAPS with "Use WebSockets" off | AAPS polls v3 `lastModified` and `history` by `srvModified`; glucose from v1 uploaders arrives with a delay of up to about 1 minute |
+| xDrip+ upload | Supports only API v1 for upload (v3 exists only for follower mode, upstream discussion #4462) |
+
+**Recommended configuration:** in AAPS, NSClient (v3), turn off "Use WebSockets" and run "Clear and reload" once. Validated in production on 2026-10-22: automatic sync resumed. Alternatively, use the NSClient v1 plugin consistently in AAPS and AAPSClient (a 15.0.0 release note says not to mix v1 and v3 clients).
+
+**Known limitation:** with WebSockets on, a bridge that emits `/storage` events for v1 writes would be needed. It is not implemented.
+
+**Diagnostic hints:**
+- The log line "Missing or bad access token or JWT" is the normal first AAPS call (empty Bearer) before it refreshes the JWT through `/api/v2/authorization/request/<token>`; it is not a failure.
+- A new image invalidates JWTs issued before the deploy (the signing key is regenerated at build); AAPS recovers by requesting a new one.
+- Check that new glucose carries `srvModified` and appears in `GET /api/v3/entries/history/<epoch-ms>` with a `Bearer` JWT of a subject with read permission (the `api-secret` header is not accepted by API v3).
+
+> Documento gerado com apoio de IA (BIA Tech). O conteúdo deve ser validado pelo profissional responsável antes de uso em decisões de produto.
+
 ---
 
 ## 5. Breaking Change Policy
@@ -332,6 +357,7 @@ The shape-handling test suite validates these requirements:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | January 2026 | Nightscout Team | Initial specification |
+| 1.1 | October 2026 | Mary (analyst) | Added 4.4: AAPS NSClient v3 with v1 uploader (xDrip+) |
 
 ---
 
