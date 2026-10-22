@@ -266,3 +266,116 @@ describe('Alexa REST api - voice record intents', function ( ) {
   });
 });
 
+
+
+describe('Alexa REST api - third person (ALEXA_PATIENT_NAME)', function ( ) {
+  this.timeout(10000);
+  const apiRoot = require('../lib/api/root');
+  const api = require('../lib/api/');
+  const secret = 'this is my long pass phrase';
+  const ptLanguage = require('../lib/language')(fs);
+  ptLanguage.set('br');
+  ptLanguage.loadLocalization(fs);
+
+  function metricBody (name) {
+    return {
+      request: {
+        type: 'IntentRequest'
+        , locale: 'pt-BR'
+        , requestId: 'amzn1.echo-api.request.' + Math.random()
+        , timestamp: new Date().toISOString()
+        , intent: {
+          name: 'MetricNow'
+          , slots: {
+            metric: {
+              name: 'metric'
+              , resolutions: { resolutionsPerAuthority: [{ status: { code: 'ER_SUCCESS_MATCH' }, values: [{ value: { name: name } }] }] }
+            }
+          }
+        }
+      }
+    };
+  }
+
+  function statusBody () {
+    return { request: { type: 'IntentRequest', locale: 'pt-BR', requestId: 'amzn1.echo-api.request.' + Math.random(), timestamp: new Date().toISOString(), intent: { name: 'NSStatus' } } };
+  }
+
+  function bootApp (extra, self, done) {
+    delete process.env.API_SECRET;
+    process.env.API_SECRET = secret;
+    var env = require('../lib/server/env')( );
+    env.settings.enable = ['alexa', 'iob', 'cob', 'basal'];
+    env.settings.authDefaultRoles = 'readable';
+    env.api_secret = secret;
+    env.extendedSettings.alexa = extra;
+    self.app = require('express')( );
+    self.app.enable('api');
+    require('../lib/server/bootevent')(env, ptLanguage).boot(function booted (ctx) {
+      self.ctx = ctx;
+      appCtx = ctx;
+      self.app.use('/api', bodyParser({ limit: 1048576 * 50 }), apiRoot(env, ctx));
+      self.app.use('/api/v1', bodyParser({ limit: 1048576 * 50 }), api(env, ctx));
+      ctx.entries.create([{ type: 'sgv', sgv: 150, direction: 'SingleUp', date: Date.now(), dateString: new Date().toISOString(), device: 'alexa-test' }], function (err) {
+        done(err);
+      });
+    });
+  }
+
+  let appCtx;
+
+  after(function (done) {
+    appCtx.entries.remove({ find: { device: 'alexa-test' } }, function () { done( ); });
+  });
+
+  describe('configured', function () {
+    before(function (done) { bootApp({ patientName: 'Gabriel', patientPreposition: 'do' }, this, done); });
+
+    it('speaks the current glucose about the person', function (done) {
+      request(this.app).post('/api/v1/alexa').send(metricBody('bg')).expect(200).end(function (err, res) {
+        if (err) return done(err);
+        res.body.response.outputSpeech.text.should.equal('A glicemia do Gabriel est\u00e1 em 150, subindo.');
+        done( );
+      });
+    });
+
+    it('speaks the insulin on board about the person', function (done) {
+      request(this.app).post('/api/v1/alexa').send(metricBody('iob')).expect(200).end(function (err, res) {
+        if (err) return done(err);
+        res.body.response.outputSpeech.text.should.match(/^(Gabriel possui [\d.]+ unidades? de insulina ativa|No momento n\u00e3o h\u00e1 insulina ativa do Gabriel\.)$/);
+        done( );
+      });
+    });
+
+    it('summarises glucose and insulin without the basal', function (done) {
+      request(this.app).post('/api/v1/alexa').send(statusBody()).expect(200).end(function (err, res) {
+        if (err) return done(err);
+        const text = res.body.response.outputSpeech.text;
+        text.should.startWith('A glicemia do Gabriel ');
+        text.should.containEql('subindo').and.match(/ (e possui [\d.]+ unidades? de insulina ativa|e n\u00e3o possui insulina ativa)\.$/);
+        text.should.not.containEql('basal');
+        done( );
+      });
+    });
+
+    it('does not duplicate separators in the summary', function (done) {
+      request(this.app).post('/api/v1/alexa').send(statusBody()).expect(200).end(function (err, res) {
+        if (err) return done(err);
+        res.body.response.outputSpeech.text.should.not.match(/\s{2,}/);
+        done( );
+      });
+    });
+  });
+
+  describe('not configured', function () {
+    before(function (done) { bootApp({}, this, done); });
+
+    it('keeps the first person', function (done) {
+      request(this.app).post('/api/v1/alexa').send(metricBody('bg')).expect(200).end(function (err, res) {
+        if (err) return done(err);
+        res.body.response.outputSpeech.text.should.equal('A sua glicemia est\u00e1 em 150, subindo.');
+        done( );
+      });
+    });
+  });
+});

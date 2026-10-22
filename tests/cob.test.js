@@ -144,13 +144,13 @@ describe('COB', function ( ) {
     it('should say there are no active carbs', function () {
       speak(0, [], 'No momento n\u00e3o h\u00e1 carboidratos ativos.');
       speak(undefined, [], 'No momento n\u00e3o h\u00e1 carboidratos ativos.');
-      speak(0, { pwd: { value: 'Gabriel' } }, 'No momento Gabriel n\u00e3o tem carboidratos ativos.');
+      speak(0, { pwd: { value: 'Gabriel' } }, 'No momento Gabriel n\u00e3o possui carboidratos ativos.');
     });
 
     it('should name the unit and use the singular for 1 gram', function () {
       speak(30, [], 'Voc\u00ea tem 30 gramas de carboidratos ativos');
       speak(1, [], 'Voc\u00ea tem 1 grama de carboidratos ativos');
-      speak(12, { pwd: { value: 'Gabriel' } }, 'Gabriel tem 12 gramas de carboidratos ativos');
+      speak(12, { pwd: { value: 'Gabriel' } }, 'Gabriel possui 12 gramas de carboidratos ativos');
     });
   });
 

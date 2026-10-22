@@ -5,9 +5,18 @@
             "intents": [
                 {
                     "name": "NSStatus",
-                    "slots": [],
+                    "slots": [
+                        {
+                            "name": "pwd",
+                            "type": "AMAZON.FirstName"
+                        }
+                    ],
                     "samples": [
-                        "Como eu estou indo"
+                        "Como eu estou indo",
+                        "como está o controle",
+                        "como está o controle do {pwd}",
+                        "como está o controle da {pwd}",
+                        "como está o controle de {pwd}"
                     ]
                 },
                 {

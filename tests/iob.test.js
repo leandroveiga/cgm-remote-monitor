@@ -79,6 +79,29 @@ describe('IOB', function() {
     it('should use the singular for exactly 1 unit', function (done) {
       speak(1, done, 'Você tem 1 unidade de insulina ativa', 'e você tem 1 unidade de insulina ativa.');
     });
+
+    describe('third person', function () {
+      const slots = { subject: { name: 'Gabriel', of: 'do Gabriel' } };
+
+      function speak3 (value, expectIntent, expectRollup, done) {
+        var sbx = { properties: { iob: { iob: value } } };
+        iob.virtAsst.intentHandlers[0].intentHandler(function next (title, response) {
+          response.should.equal(expectIntent);
+          iob.virtAsst.rollupHandlers[0].rollupHandler(slots, sbx, function callback (err, rollup) {
+            rollup.results.should.equal(expectRollup);
+            done();
+          });
+        }, slots, sbx);
+      }
+
+      it('should speak about the configured person', function (done) {
+        speak3(3, 'Gabriel possui 3 unidades de insulina ativa', 'e possui 3 unidades de insulina ativa.', done);
+      });
+
+      it('should handle no active insulin', function (done) {
+        speak3(0, 'No momento não há insulina ativa do Gabriel.', 'e não possui insulina ativa.', done);
+      });
+    });
   });
 
   describe('from treatments', function ( ) {

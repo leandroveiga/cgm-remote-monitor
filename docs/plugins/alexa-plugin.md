@@ -123,6 +123,15 @@ Alexa request signature verification is not implemented by the plugin.
 
 Responses use the server language (`LANGUAGE` setting, e.g. `br` for Portuguese - Brazil).
 
+## Speaking about another person (optional)
+
+By default the answers address the user ("A sua glicemia...", "Você tem..."). When Nightscout follows someone else, for example a child, set these extended settings of the `alexa` plugin:
+
+- `ALEXA_PATIENT_NAME=Gabriel`: enables the third-person mode.
+- `ALEXA_PATIENT_PREPOSITION=do` (optional): `do`, `da` or `de` (default is `de` in pt-BR, `of` in English).
+
+Example answers (pt-BR): "A glicemia do Gabriel está em 120, estável." and, for "Como está o controle do Gabriel?", "A glicemia do Gabriel há 5 minutos era de 120, estável. e possui 3 unidades de insulina ativa." In this mode the summary leaves the basal out (it can still be asked on its own). Readings up to 5 minutes old are spoken as current ("está em 120"); older ones say how long ago they were taken ("há 25 minutos era de 120"). Languages without the third-person phrases keep the first-person answers. The pt-br template needs the new `NSStatus` samples and `pwd` slot: update the interaction model and rebuild it.
+
 ## Updating your skill with new features
 
 As more work is done on Nightscout, new ways to interact with Nighscout via Alexa may be made available. To be able to use these new features, you first will need to [update your Nightscout site](https://github.com/nightscout/cgm-remote-monitor#updating-my-version), and then you can follow the steps below to update your Alexa skill.
