@@ -1,7 +1,7 @@
 {
     "interactionModel": {
         "languageModel": {
-            "invocationName": "night scout",
+            "invocationName": "controle glicemia",
             "intents": [
                 {
                     "name": "NSStatus",
@@ -16,7 +16,15 @@
                         "como está o controle",
                         "como está o controle do {pwd}",
                         "como está o controle da {pwd}",
-                        "como está o controle de {pwd}"
+                        "como está o controle de {pwd}",
+                        "como está o {pwd}",
+                        "como está a {pwd}",
+                        "como vai o {pwd}",
+                        "como vai a {pwd}",
+                        "como estou",
+                        "me dê um resumo",
+                        "resumo do {pwd}",
+                        "resumo da {pwd}"
                     ]
                 },
                 {
@@ -55,6 +63,27 @@
                         "como está o {metric} do {pwd}",
                         "qual é a {metric} do {pwd}",
                         "qual é o {metric} do {pwd}",
+                        "qual é a {metric} da {pwd}",
+                        "qual é a {metric} de {pwd}",
+                        "qual a {metric} do {pwd}",
+                        "qual a {metric} da {pwd}",
+                        "qual o {metric} do {pwd}",
+                        "como está a {metric} da {pwd}",
+                        "como está a {metric} de {pwd}",
+                        "quanto de {metric} o {pwd} tem",
+                        "quanto de {metric} a {pwd} tem",
+                        "quanto de {metric} tem o {pwd}",
+                        "quanto de {metric} tem a {pwd}",
+                        "{metric} do {pwd}",
+                        "a {metric} do {pwd}",
+                        "o {metric} do {pwd}",
+                        "{metric} da {pwd}",
+                        "a {metric} da {pwd}",
+                        "qual é a {metric}",
+                        "qual é o {metric}",
+                        "qual a minha {metric}",
+                        "qual o meu {metric}",
+                        "quanto de {metric} eu tenho",
                         "quanto tem de {metric} o {pwd}",
                         "quanto tem de {metric} do {pwd}",
                         "quanto tem de {metric}",
@@ -88,6 +117,12 @@
                         "registrar {units} unidades de insulina",
                         "anote {units} unidades de insulina",
                         "registre {units} unidade de insulina",
+                        "registre {units} unidades",
+                        "anote {units} unidade de insulina",
+                        "tomei {units} unidades de insulina",
+                        "apliquei {units} unidades de insulina",
+                        "anote insulina",
+                        "registrar insulina",
                         "registre insulina"
                     ]
                 },
@@ -107,6 +142,10 @@
                         "registre {grams} gramas de carboidratos",
                         "registrar {grams} gramas de carboidratos",
                         "anote {grams} gramas de carboidratos",
+                        "registre {grams} gramas",
+                        "comi {grams} gramas de carboidratos",
+                        "anote carboidratos",
+                        "registrar carboidratos",
                         "registre carboidratos"
                     ]
                 },
@@ -182,7 +221,9 @@
                                     "glicose",
                                     "nível de glicose",
                                     "açúcar no sangue",
-                                    "glicose no sangue"
+                                    "glicose no sangue",
+                                    "açúcar",
+                                    "glicemia atual"
                                 ]
                             }
                         },
