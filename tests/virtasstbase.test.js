@@ -14,7 +14,7 @@ describe('virtAsstBase glucose phrases', function () {
 
   before(function () {
     ctx.language.offerTranslations(require('../translations/pt_BR.json'));
-    moment.locale('pt');
+    ctx.language.set('br');
     ctx.moment = moment;
     ctx.entries = { list: function (opts, cb) { cb(null, [{ date: now - ageMinutes * 60000, sgv: 120, direction: 'Flat' }]); } };
     const plugin = {
@@ -26,7 +26,7 @@ describe('virtAsstBase glucose phrases', function () {
 
   after(function () {
     ctx.language.offerTranslations(enTranslations);
-    moment.locale('en');
+    ctx.language.set('en');
   });
 
   const sbx = { time: now, scaleMgdl: function (v) { return v; } };
