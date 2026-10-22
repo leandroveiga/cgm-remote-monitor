@@ -17,8 +17,7 @@ processes = []
 #
 
 [env]
-# A passphrase that must be at least 12 characters long. Avoid 'special' characters, which can cause problems in some cases.
-API_SECRET="37e67dcc-b6f7-4aeb-b137-3b8acdad6b06"
+# API_SECRET and MONGODB_URI are defined as Fly secrets (fly secrets set), never in this file.
 
 # Preferred BG units for the site: 'mg/dl' or 'mmol/l' (or just 'mmol').
 DISPLAY_UNITS="mg/dl"
@@ -30,9 +29,6 @@ ALEXA_MAX_INSULIN="10"
 ALEXA_MAX_CARBS="150"
 ALEXA_PATIENT_NAME="Gabriel"
 ALEXA_PATIENT_PREPOSITION="do"
-
-# The MongoDB Connection String to connect to your MongoDB cluster. If you don't have this from MongoDB Atlas, please re-read installation instructions at https://nightscout.github.io/vendors/mongodb/atlas/ before continuing.
-MONGODB_URI="mongodb+srv://leanveiga:LmVV6AF1MAmFgBTQ@clusternightscout.x7eogpc.mongodb.net/?retryWrites=true&w=majority"
 
 #
 # If you want Nightscout to get BG readings from Dexcom Share you must enter your account credentials
