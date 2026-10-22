@@ -1,0 +1,102 @@
+# Histórias do epic, em ordem de construção. Detalhes e critérios Gherkin: requisitos-fase2-painel-alexa.md, seção 12.
+
+[[entry]]
+id = 1
+type = "story"
+title = "Persistir e aplicar nome e preposição via API administrativa"
+description = "Salva nome e preposição em coleção MongoDB própria por API com permissão admin, validação e revisão, e faz a Alexa usá-los sem reinício."
+verify = "Um PUT com nome Gabriel e preposição do muda a frase da Alexa na requisição seguinte; entrada inválida retorna 400, revisão antiga 409 e token sem permissão 401/403."
+covers = ["R1", "R6", "R8", "R9", "R11", "R14", "R16", "R17"]
+after = []
+hitl = false
+risk = "medium"
+
+[[entry]]
+id = 2
+type = "story"
+title = "Seção Alexa no /admin com nome e preposição"
+description = "Adiciona ao /admin a seção Alexa com os campos nome e preposição, mensagens de validação e confirmação em pt-BR e en."
+verify = "No /admin, um administrador salva Gabriel/do e vê confirmação; nome com mais de 40 caracteres mostra o erro no idioma ativo e não grava."
+covers = ["R1", "R13"]
+after = [1]
+hitl = false
+risk = "low"
+
+[[entry]]
+id = 3
+type = "story"
+title = "Registro por voz, limites, skill ID e precedência no backend"
+description = "Estende a API e o resolvedor com habilitar registro, limites, skill ID mascarado, teto de segurança e precedência painel > ambiente > padrão com origem por campo."
+verify = "Com limite 10 no ambiente e 5 no painel, 6 unidades é recusado; remover o valor do painel volta a 10; a leitura nunca traz o skill ID completo."
+covers = ["R2", "R3", "R4", "R7", "R12"]
+after = [1]
+hitl = false
+risk = "high"
+
+[[entry]]
+id = 4
+type = "story"
+title = "Tela dos demais campos, origem do valor e skill ID mascarado"
+description = "Adiciona à seção Alexa os campos de registro, limites e skill ID, mostra a origem de cada valor e o botão de voltar ao ambiente."
+verify = "A tela mostra o valor e a origem (painel/ambiente/padrão) de cada campo; remover o valor do painel devolve o valor do ambiente; o skill ID aparece só mascarado."
+covers = ["R2", "R3", "R4", "R7", "R13"]
+after = [2, 3]
+hitl = false
+risk = "medium"
+
+[[entry]]
+id = 5
+type = "story"
+title = "Auditoria de alterações"
+description = "Registra quem, quando, campo, valor anterior e novo em cada gravação aceita, sem o skill ID em claro, e permite consulta."
+verify = "Alterar o limite de insulina de 10 para 5 cria um registro com os dois valores; alterar o skill ID registra só 'alterado'; entrada rejeitada não gera registro."
+covers = ["R10", "R12"]
+after = [3]
+hitl = false
+risk = "medium"
+
+[[entry]]
+id = 6
+type = "story"
+title = "Prévia das frases geradas"
+description = "Gera, a partir do formulário, as frases de glicemia, resumo e registro confirmado com as mesmas rotinas e traduções dos handlers, sem efeitos colaterais."
+verify = "Editar nome e preposição muda a prévia; nada é gravado nem criado como tratamento; o texto é igual ao da resposta real para a mesma configuração."
+covers = ["R15"]
+after = [2]
+hitl = false
+risk = "low"
+
+[[entry]]
+id = 7
+type = "story"
+title = "Limite de idade configurável para 'está em' e 'há N minutos'"
+description = "Torna configurável (1 a 60 min, padrão 5) o limite de idade da leitura hoje fixo em 5 minutos."
+verify = "Com limite 15, uma leitura de 12 minutos usa 'está em'; com limite 5, uma de 8 minutos usa 'há 8 minutos era de'; 0 e 90 são rejeitados."
+covers = ["R5"]
+after = [3]
+hitl = false
+risk = "low"
+refine = true
+unknown = "Incluir o limite de idade nesta fase e com qual faixa (1 a 60 min)?"
+
+[[entry]]
+id = 8
+type = "story"
+title = "Documentação e verificação em produção no Fly"
+description = "Atualiza a documentação do plugin Alexa e executa, com uma pessoa, o roteiro de verificação na Echo em produção."
+verify = "O documento lista variáveis, precedência, permissões, campos e exemplos; o roteiro executado no Fly (nome, limite, registro, voltar ao ambiente) é anexado ao ticket."
+covers = ["R18"]
+after = [4, 5, 6]
+hitl = true
+risk = "low"
+
+[[entry]]
+id = 9
+type = "story"
+title = "Refactor sweep"
+description = "Consolida o código do epic, removendo leituras diretas antigas da configuração fora do resolvedor, sem comportamento novo."
+verify = "Não restam leituras diretas de env.extendedSettings.alexa nos handlers fora do resolvedor; suíte de testes e lint passam sem alterar expectativas."
+covers = []
+after = [1, 2, 3, 4, 5, 6, 7, 8]
+hitl = false
+risk = "low"
