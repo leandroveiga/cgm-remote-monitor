@@ -23,6 +23,14 @@ API_SECRET="37e67dcc-b6f7-4aeb-b137-3b8acdad6b06"
 # Preferred BG units for the site: 'mg/dl' or 'mmol/l' (or just 'mmol').
 DISPLAY_UNITS="mg/dl"
 
+# Alexa skill (classic): voice recording and third-person mode
+ALEXA_SKILL_ID="amzn1.ask.skill.b76aee89-6b6b-407c-8f7d-7431d0688fa4"
+ALEXA_RECORD_ENABLED="true"
+ALEXA_MAX_INSULIN="10"
+ALEXA_MAX_CARBS="150"
+ALEXA_PATIENT_NAME="Gabriel"
+ALEXA_PATIENT_PREPOSITION="do"
+
 # The MongoDB Connection String to connect to your MongoDB cluster. If you don't have this from MongoDB Atlas, please re-read installation instructions at https://nightscout.github.io/vendors/mongodb/atlas/ before continuing.
 MONGODB_URI="mongodb+srv://leanveiga:LmVV6AF1MAmFgBTQ@clusternightscout.x7eogpc.mongodb.net/?retryWrites=true&w=majority"
 
